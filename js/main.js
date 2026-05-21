@@ -88,19 +88,37 @@ document.addEventListener('DOMContentLoaded', () => {
   counters.forEach(el => countObs.observe(el));
 
   /* ── CONTACT FORM ── */
-  const form = document.getElementById('contactForm');
+ const form = document.getElementById('contactForm');
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector('.form-submit');
       const success = form.querySelector('.form-success');
+
       btn.textContent = 'Sending…';
       btn.disabled = true;
-      setTimeout(() => {
-        btn.style.display = 'none';
-        success.style.display = 'block';
-        form.reset();
-      }, 1400);
+
+      const data = new FormData(form);
+
+      try {
+        const res = await fetch('https://formspree.io/f/xwvzoqok', {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          btn.style.display = 'none';
+          success.style.display = 'block';
+          form.reset();
+        } else {
+          throw new Error('Failed');
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+        alert('Something went wrong. Please reach out via WhatsApp instead.');
+      }
     });
   }
 
